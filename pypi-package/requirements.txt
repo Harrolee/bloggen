@@ -1,0 +1,2 @@
+# generate from virtualenv
+# learn how to get these dependencies automagically installed on consumer systems during pip install of this package
