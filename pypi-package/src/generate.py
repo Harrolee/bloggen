@@ -1,13 +1,9 @@
 import os
+from sys import stderr
 import markdown
 import bs4
 from pathlib import Path
 
-
-# Creates a new bucket and uploads an object
-# new_bucket = client.create_bucket('new-bucket-id')
-# new_blob = new_bucket.blob('remote/path/storage.txt')
-# new_blob.upload_from_filename(filename='/local/path.txt')
 def get_static_site_dir():
     dir = os.path.dirname(__file__)
     path = Path(dir)
@@ -17,7 +13,6 @@ def get_static_site_dir():
 
 def html_files(path_to_md_dir:str):
     not_md = []
-    # print(path_to_md_dir)
     for md in os.listdir(path_to_md_dir):
         if md.endswith('.md'):
             print('file: '+ md)
@@ -51,17 +46,43 @@ def index(path_to_site:str=get_static_site_dir()):
     with open(path_to_index) as in_f:
         txt = in_f.read()
         soup = bs4.BeautifulSoup(txt, features="html5lib")
-
+    os.remove(path_to_index)
     post_names:list[str] = sorted(os.listdir(path_to_posts_dir))
     for post_name in post_names:
+        post_name = post_name.removesuffix('.html')
         new_li = soup.new_tag('li')
         new_anchor = soup.new_tag('a', href=os.path.join('notes',post_name))
-        new_anchor.string = post_name.removesuffix('.html')
+        new_anchor.attrs['id'] = post_name.replace(' ','')
+        new_anchor.string = post_name
         new_li.append(new_anchor)
         soup.body.ul.append(new_li)
 
-    with open(path_to_index, "w") as out_f:
+    with open(path_to_index, "x") as out_f:
         out_f.write(str(soup))
+
+def prep_for_hosting(notes_root:str, ):
+    switch_index_references(notes_root)
+
+# Please refactor to take a callback. Follow this guide:
+# https://stackoverflow.com/questions/55751368/python-how-to-pass-to-a-function-argument-type-of-a-class-object-typing
+def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir()):
+    path_to_posts_dir = os.path.join(path_to_site,'notes')
+    path_to_index = os.path.join(path_to_site,'index.html')
+    with open(path_to_index) as in_f:
+        txt = in_f.read()
+        soup = bs4.BeautifulSoup(txt, features="html5lib")
+    os.remove(path_to_index)
+    post_names:list[str] = sorted(os.listdir(path_to_posts_dir))
+    for post_name in post_names:
+        tag_id = post_name.removesuffix('.html').replace(' ','')
+        anchor:bs4.Tag = soup.find(id=tag_id)
+        if anchor:
+            anchor.attrs['href'] = notes_root + post_name.replace(' ','%20')
+        else:
+            print(f"Index.html linking won't work. Could not find a tag with tag_id '{tag_id}'. As a result, I could not update the link.",stderr)
+
+    with open(path_to_index, "x") as out_f:
+        out_f.write(str(soup))    
 
 def generate_site(path: str):
     """

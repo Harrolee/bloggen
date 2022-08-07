@@ -9,6 +9,7 @@ class Site:
     def __init__(self):
         self.client = storage.Client()
         self.bucket_name = 'first-bloggen-bucket'
+        self.host_url = 'https://storage.cloud.google.com/'
         self.bucket = None
         try:
             self.bucket = self.get_bucket(self.bucket_name)
@@ -32,10 +33,16 @@ class Site:
         blob.upload_from_filename(outfile)
 
     def publish(self, path_to_static_site:str=generate.get_static_site_dir()):
+        # need to prepare for hosting site:
+            # replace all local hrefs with refs to files on cloud.
+            # Will follow this pattern: https://storage.cloud.google.com/first-bloggen-bucket/static-site/notes/test%20copy%202.html
+        notes_root = f"{self.host_url}{self.bucket_name}/static-site/notes/"
+        generate.prep_for_hosting(notes_root)
+
         if self.bucket:
             print('uploading bucket')
             self.upload_site(path_to_static_site)
-            bucket_url = f"https://storage.cloud.google.com/{self.bucket_name}/static-site/index.html"
+            bucket_url = f"{self.host_url}{self.bucket_name}/static-site/index.html"
             print(f'Your notes are available as html at {bucket_url}')
         else:
             print("Bucket not insantiated",file=sys.stderr)
@@ -57,17 +64,19 @@ class Site:
         else:
             self.bucket.make_private
 
-    def upload_site(self, path_to_dir):
+    def upload_site(self, path_to_dir:str):
         root = os.path.basename(path_to_dir)
         for path, _, files in os.walk(path_to_dir):
             for name in files:
                 print(f'uploading file {name}')
-                blob_path = os.path.join(root, name).replace('\\','/')
+                root_index = path_to_dir.find(root)
+                print(root_index)
+                blob_path = os.path.join(path, name).replace('\\','/')[root_index:]
+                print('blob path: '+blob_path)
                 blob = self.bucket.blob(blob_path)
                 local_path = os.path.join(path, name)
                 blob.upload_from_filename(local_path)
 
-    
     def upload_files(self, path_to_dir) -> str:
         print(path_to_dir)
         for path, _, files in os.walk(path_to_dir):
@@ -77,4 +86,3 @@ class Site:
                 blob_path = path_local.replace('\\','/')
                 blob = self.bucket.blob(blob_path)
                 blob.upload_from_filename(path_local)
-                return blob.path
