@@ -43,7 +43,7 @@ def create_parser():
     parser = argparse.ArgumentParser(description="Create a static site!")
     parser.add_argument('-a', '--add', help="Upload a .md file.")
     parser.add_argument('--destroy', help="Terminates bucket!")
-    parser.add_argument('-g','--generate', help="Builds static site locally.", action='store_const', const='no_args')
+    parser.add_argument('-g','--generate', help="Builds static site locally.", nargs='?', const='no_args')
     parser.add_argument('--remove', help="Removes a file from bucket.")
     parser.add_argument('--sync', help="Uploads directory to bucket.")
     parser.add_argument('-p','--publish', help="Uploads static site to bucket.", action='store_const', const='no_args')

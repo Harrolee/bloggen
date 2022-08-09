@@ -49,9 +49,9 @@ def index(path_to_site:str=get_static_site_dir()):
     os.remove(path_to_index)
     post_names:list[str] = sorted(os.listdir(path_to_posts_dir))
     for post_name in post_names:
-        post_name = post_name.removesuffix('.html')
         new_li = soup.new_tag('li')
         new_anchor = soup.new_tag('a', href=os.path.join('notes',post_name))
+        post_name = post_name.removesuffix('.html')
         new_anchor.attrs['id'] = post_name.replace(' ','')
         new_anchor.string = post_name
         new_li.append(new_anchor)
@@ -63,8 +63,7 @@ def index(path_to_site:str=get_static_site_dir()):
 def prep_for_hosting(notes_root:str, ):
     switch_index_references(notes_root)
 
-# Please refactor to take a callback. Follow this guide:
-# https://stackoverflow.com/questions/55751368/python-how-to-pass-to-a-function-argument-type-of-a-class-object-typing
+# Please refactor to take a callback. Follow this guide: # https://stackoverflow.com/questions/55751368/python-how-to-pass-to-a-function-argument-type-of-a-class-object-typing
 def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir()):
     path_to_posts_dir = os.path.join(path_to_site,'notes')
     path_to_index = os.path.join(path_to_site,'index.html')
