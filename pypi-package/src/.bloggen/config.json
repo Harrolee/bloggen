@@ -1,0 +1,1 @@
+[{"name": "default", "active": true, "data": {"backend": "gcp", "credentials": "path_to_credentials"}}, {"name": "Lee", "active": false, "data": {"backend": "gcp", "credentials": "path_to_credentials"}}, {"name": "Kevin", "active": false, "data": {"backend": "gcp", "credentials": "path_to_credentials"}}]

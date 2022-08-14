@@ -43,7 +43,7 @@ def index(path_to_site:str=get_static_site_dir()):
     """
     path_to_posts_dir = os.path.join(path_to_site,'notes')
     path_to_index = os.path.join(path_to_site,'index.html')
-    with open(path_to_index) as in_f:
+    with open('index.html') as in_f:
         txt = in_f.read()
         soup = bs4.BeautifulSoup(txt, features="html5lib")
     os.remove(path_to_index)
@@ -61,6 +61,7 @@ def index(path_to_site:str=get_static_site_dir()):
         out_f.write(str(soup))
 
 def prep_for_hosting(notes_root:str, ):
+    # access config file
     switch_index_references(notes_root)
 
 # Please refactor to take a callback. Follow this guide: # https://stackoverflow.com/questions/55751368/python-how-to-pass-to-a-function-argument-type-of-a-class-object-typing

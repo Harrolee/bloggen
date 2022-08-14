@@ -1,15 +1,13 @@
+from config import configure_bloggen
 from static_site import Site 
 from dotenv import load_dotenv
 load_dotenv()
-import os
 import argparse
-
-GCP_TOKEN_NAME = 'GOOGLE_APPLICATION_CREDENTIALS'
     
 def main():
+    configure_bloggen()
     parser = create_parser()
     args = parser.parse_args()
-    config()
     site = Site()
     if args.add:
         site.add(args.add)
@@ -23,21 +21,6 @@ def main():
             site.publish()
         else:
             site.publish(args.publish)
-
-
-def config():
-    if not os.getenv(GCP_TOKEN_NAME):
-        input('GCP credential not found. Please add to .env and then continue.')
-        load_dotenv()
-        return
-
-    if not os.path.exists('.env'):
-        with open( '.env','w') as f:
-            f.write('# Get a service token from GCP.')
-            f.write('\n# Follow this guide https://cloud.google.com/storage/docs/reference/libraries#setting_up_authentication' )
-            f.write('\n# Save the JSON to your machine. ')
-            f.write('\n# Write the path into this env var.')
-            f.write(f'\n{GCP_TOKEN_NAME}=')
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Create a static site!")

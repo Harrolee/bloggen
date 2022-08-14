@@ -1,0 +1,8 @@
+{
+  "gcp": {
+    "credential_var": "GOOGLE_APPLICATION_CREDENTIALS",
+    "backend_base_url": "https://storage.cloud.google.com/"
+  },
+  "aws": {},
+  "ghpages": {}
+}
