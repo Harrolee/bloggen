@@ -1,0 +1,16 @@
+{
+  "bloggenNode": {
+    "id": "uuid",
+    "metadata": [],
+    "notes": ["token_to_link_1", "token_to_link_2"],
+    "children": ["token_to_child_1", "token_to_child_2"]
+  },
+  "note": {
+    "id": "note_user_uuid",
+    "subject": "subject",
+    "timestamp": "timestamp",
+    "content": "link_to_content",
+    "style": "style_token",
+    "tags": []
+  }
+}

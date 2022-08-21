@@ -1,0 +1,8 @@
+{
+  "id": "note_user_uuid",
+  "subject": "subject",
+  "timestamp": "timestamp",
+  "content": "link_to_content",
+  "style": "style_token",
+  "tags": []
+}

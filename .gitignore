@@ -1,3 +1,5 @@
 pypi-package/static-site
 pypi-package/src/notes
 pypi-package/dist
+pypi-package/src/__pycache__
+

@@ -1,0 +1,41 @@
+{
+  "index": {
+    "rootNode": "blog_user_uuid1",
+    "nodes": ["blog_user_uuid2", "blog_user_uuid3"],
+    "notes": ["token_to_note_1", "token_to_note_2", "token_to_note_3"]
+  },
+  "relationships": [
+    {
+      "blog_user_uuid1": {
+        "blogs": ["blog_user_uuid2"],
+        "notes": ["note_user_uuid1", "note_user_uuid2"]
+      }
+    },
+    {
+      "blog_user_uuid2": {
+        "blogs": ["blog_user_uuid3"],
+        "notes": ["note_user_uuid3"]
+      }
+    }
+  ],
+  "data": {
+    "nodes": [
+      {
+        "id": "blog_user_uuid1",
+        "metadata": [{ "timestamp": "2016-01-01T00:00:00Z" }]
+      }
+    ],
+    "notes": [
+      {
+        "id": "note_user_uuid1",
+        "subject": "State Fair",
+        "content": "content_user_uuid1",
+        "tags": ["fun", "friends"],
+        "metadata": [
+          { "timestamp": "2016-01-01T00:00:00Z" },
+          { "style": "style_token" }
+        ]
+      }
+    ]
+  }
+}
