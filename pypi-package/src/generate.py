@@ -2,7 +2,7 @@ import os
 from sys import stderr
 import markdown
 import bs4
-from pathlib import Path
+from pathlib import Path, PurePath
 
 def get_static_site_dir():
     dir = os.path.dirname(__file__)

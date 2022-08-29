@@ -29,7 +29,7 @@
       {
         "id": "note_user_uuid1",
         "subject": "State Fair",
-        "content": "content_user_uuid1",
+        "content": "link_to_content",
         "tags": ["fun", "friends"],
         "metadata": [
           { "timestamp": "2016-01-01T00:00:00Z" },
