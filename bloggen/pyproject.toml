@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "bloggen"
+version = "0.1.9"
+description = "Deploy md as a static site"
+authors = ["Lee Harrold <halzinnia@gmail.com>"]
+license =  "ISC" 
+readme = "README.md"
+include = ["src", "static-site"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+argparse = "^1.4"
+Markdown = "^3.4.1"
+google-cloud-storage = "^2.5.0"
+pathlib = "^1.0.1"
+beautifulsoup4 = "^4.11.1"
+
+[tool.poetry.scripts]
+bloggen = "bloggen.__main__:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

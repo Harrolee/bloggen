@@ -1,3 +1,26 @@
+# Bugs:
+
+### It is possible for the user to execute bloggen.py from outside of the pypi/src dir. See below:
+
+```
+(bloggen) lee@porkbelly bloggen % python pypi-package/src/bloggen.py --generate wallet_notes
+Traceback (most recent call last):
+  File "/Users/lee/bloggen/pypi-package/src/bloggen.py", line 54, in <module>
+    main()
+  File "/Users/lee/bloggen/pypi-package/src/bloggen.py", line 9, in main
+    config = Configure()
+  File "/Users/lee/bloggen/pypi-package/src/config.py", line 10, in __init__
+    self.active_config = self.get_active_config()
+  File "/Users/lee/bloggen/pypi-package/src/config.py", line 33, in get_active_config
+    with open('.bloggen/config.json') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '.bloggen/config.json'
+```
+
+### How do you publish a site?
+
+I think you have to --publish [path_to_local_static_site]
+Make this work without passing the path to a site.
+
 # How
 
 Make the class that changes links a class that references the provider defined in a central config file
@@ -8,7 +31,7 @@ The user provides a notes directory.
 Bloggen should derive the structure of the user's blog from the notes dir.
 Bloggen should interpret every folder as a new blog node.
 
-## Strategy for generateing site_info
+## Strategy for generating site_info
 
 ### data
 

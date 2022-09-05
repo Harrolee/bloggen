@@ -3,21 +3,16 @@ import os
 import markdown
 import time
 import sys
-import generate
+import bloggen.generate as generate
 
 class Site:
-    def __init__(self):
+    def __init__(self, user_config):
+        self.user_config = user_config
         self.client = storage.Client()
-        self.bucket_name = 'first-bloggen-bucket'
+        self.bucket_name = self.user_config.active_config['data']['buckets'][0]
         self.host_url = 'https://storage.cloud.google.com/'
         self.bucket = None
-        try:
-            self.bucket = self.get_bucket(self.bucket_name)
-        except:
-            if not self.bucket:
-                self.bucket = self.make_bucket(self.bucket_name)
-                print('Creating a new bucket')
-                time.sleep(4)
+        self.retrieve_bucket(self.bucket_name)
         #blob = self.bucket.blob('notes/index.html')
         #blob.upload_from_filename('notes/index.html')
 
@@ -39,10 +34,15 @@ class Site:
         notes_root = f"{self.host_url}{self.bucket_name}/static-site/notes/"
         generate.prep_for_hosting(notes_root)
 
-        if self.bucket:
+        # learn which bucket to use
+        target_bucket_name = self.user_config.active_config['data']['buckets'][0] if len(self.user_config.active_config['data']['buckets']) < 2 else input(f"Which bucket? {self.user_config.active_config['data']['buckets']}")
+        # learn if bucket exists
+        target_bucket = self.retrieve_bucket(target_bucket_name)
+
+        if target_bucket:
             print('uploading bucket')
             self.upload_site(path_to_static_site)
-            bucket_url = f"{self.host_url}{self.bucket_name}/static-site/index.html"
+            bucket_url = f"{self.host_url}{target_bucket_name}/static-site/index.html"
             print(f'Your notes are available as html at {bucket_url}')
         else:
             print("Bucket not insantiated",file=sys.stderr)
@@ -86,3 +86,12 @@ class Site:
                 blob_path = path_local.replace('\\','/')
                 blob = self.bucket.blob(blob_path)
                 blob.upload_from_filename(path_local)
+
+    def retrieve_bucket(self, bucket_name):
+        try:
+            return self.get_bucket(bucket_name)
+        except:
+            bucket = self.make_bucket(bucket_name)
+            print(f'Creating a new bucket named {bucket_name}')
+            time.sleep(4)
+            return bucket
