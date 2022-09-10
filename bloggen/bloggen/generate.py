@@ -2,7 +2,7 @@ import os
 from sys import stderr
 import markdown
 import bs4
-from pathlib import Path, PurePath
+from pathlib import Path
 
 def get_static_site_dir():
     dir = os.path.dirname(__file__)
@@ -45,7 +45,7 @@ def index(path_to_site:str=get_static_site_dir()):
     path_to_index = os.path.join(path_to_site,'index.html')
     with open('index.html') as in_f:
         txt = in_f.read()
-        soup = bs4.BeautifulSoup(txt, features="html5lib")
+        soup = bs4.BeautifulSoup(txt, features="html.parser")
     os.remove(path_to_index)
     post_names:list[str] = sorted(os.listdir(path_to_posts_dir))
     for post_name in post_names:
@@ -70,7 +70,7 @@ def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir(
     path_to_index = os.path.join(path_to_site,'index.html')
     with open(path_to_index) as in_f:
         txt = in_f.read()
-        soup = bs4.BeautifulSoup(txt, features="html5lib")
+        soup = bs4.BeautifulSoup(txt, features="html.parser")
     os.remove(path_to_index)
     post_names:list[str] = sorted(os.listdir(path_to_posts_dir))
     for post_name in post_names:

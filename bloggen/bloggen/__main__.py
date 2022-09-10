@@ -1,3 +1,4 @@
+from ast import arguments
 from bloggen.config import Configure
 from bloggen.static_site import Site 
 import sys
@@ -8,34 +9,43 @@ def main():
     parser = create_parser()
     if len(sys.argv) == 1:
         parser.print_help()
-    args = parser.parse_args()
-    if args.config:  
-        if args.config in ['no_args','create','new']:
-            config.create_config()
-        elif args.config in ['list','ls']:
-            config.list_config_names()
-        else:
-            if config.config_exists(args.config):
-                print(f"Activating {args.config}")
-                config.set_active_config(args.config)
-            else:
-                print(f"Config {args.config} does not exist.")
-                print(f"These configs exist:")
+    else: 
+        args = parser.parse_args()
+        print(args)
+        if args.config:
+            argument: str = args.config
+            if argument in ['no_args','create','new']:
+                config.create_user_config()
+            elif argument in ['list','ls']:
                 config.list_config_names()
-    else:
-        site = Site(config)
-        if args.add:
-            site.add(args.add)
-        elif args.generate:
-            if args.generate == 'no_args':
-                site.generate()
+            elif argument.__contains__('='):
+                key, value = argument.split('=')
+                config.update_user_config(key,value)
             else:
-                site.generate(args.generate)
-        elif args.publish:
-            if args.publish == 'no_args':
-                site.publish()
+                if config.user_config_exists(argument):
+                    print(f"Activating {argument}")
+                    config.set_active_config(argument)
+                else:
+                    print(f"User config {argument} does not exist.")
+                    print(f"These configs exist:")
+                    config.list_config_names()
+        else:
+            if not config.valid_user_config(config.active_config):
+                pass
             else:
-                site.publish(args.publish)
+                site = Site(config)
+                if args.add:
+                    site.add(args.add)
+                elif args.generate:
+                    if args.generate == 'no_args':
+                        site.generate()
+                    else:
+                        site.generate(args.generate)
+                elif args.publish:
+                    if args.publish == 'no_args':
+                        site.publish()
+                    else:
+                        site.publish(args.publish)
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Create a static site!")

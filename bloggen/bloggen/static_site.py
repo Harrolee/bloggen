@@ -13,8 +13,6 @@ class Site:
         self.host_url = 'https://storage.cloud.google.com/'
         self.bucket = None
         self.retrieve_bucket(self.bucket_name)
-        #blob = self.bucket.blob('notes/index.html')
-        #blob.upload_from_filename('notes/index.html')
 
     def add(self, path_to_md):
         with open(path_to_md) as f:
