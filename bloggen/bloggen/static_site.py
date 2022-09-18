@@ -1,3 +1,4 @@
+from pathlib import Path
 from google.cloud import storage
 import os
 import markdown
@@ -13,6 +14,8 @@ class Site:
         self.host_url = 'https://storage.cloud.google.com/'
         self.bucket = None
         self.retrieve_bucket(self.bucket_name)
+        # below line assumes that the user generates a static site in their cwd
+        self.static_site_root = Path(os.getcwd())
 
     def add(self, path_to_md):
         with open(path_to_md) as f:
@@ -45,10 +48,12 @@ class Site:
         else:
             print("Bucket not insantiated",file=sys.stderr)
 
-    def generate(self, path_to_md_dir=os.getcwd()):
-        generate.html_files(path_to_md_dir)
-        generate.index()
-        print(f'See your local site at {os.path.join(generate.get_static_site_dir(),"index.html")}')
+    def generate(self, path_to_md_dir: Path):
+        self.static_site_root = Path.joinpath(path_to_md_dir.parent,'static-site')
+        generate.static_site(self.static_site_root)
+        generate.html_files(path_to_md_dir, self.static_site_root)
+        generate.index(self.static_site_root)
+        print(f'See your local site at {os.path.join(self.static_site_root,"index.html")}')
 
     def get_bucket(self, name):
         return self.client.get_bucket(name)

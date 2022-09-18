@@ -1,1 +1,32 @@
-[{"name": "default", "active": false, "data": {"backend": "gcp", "credentials": "path_to_credentials", "project": "", "buckets": ["default_bloggen_bucket"]}}, {"name": "Lee", "active": true, "data": {"backend": "gcp", "credentials": "/Users/lee/keys/gcp_adc/harrold_connect.json", "project": "bloggenlee", "buckets": ["default_bloggen_bucket"]}}, {"name": "Kevin", "active": false, "data": {"backend": "gcp", "credentials": "path_to_credentials", "project": "", "buckets": ["default_bloggen_bucket"]}}]
+[
+  {
+    "name": "default",
+    "active": false,
+    "data": {
+      "backend": "gcp",
+      "credentials": "path_to_credentials",
+      "project": "",
+      "buckets": ["default_bloggen_bucket"]
+    }
+  },
+  {
+    "name": "Lee",
+    "active": true,
+    "data": {
+      "backend": "gcp",
+      "credentials": "/Users/lee/keys/gcp_adc/harrold_connect.json",
+      "project": "bloggenlee",
+      "buckets": ["default_bloggen_bucket"]
+    }
+  },
+  {
+    "name": "Kevin",
+    "active": false,
+    "data": {
+      "backend": "gcp",
+      "credentials": "path_to_credentials",
+      "project": "",
+      "buckets": ["default_bloggen_bucket"]
+    }
+  }
+]

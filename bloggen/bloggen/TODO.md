@@ -2,7 +2,29 @@
 
 ### How do you publish a site?
 
-Think about how you want users to use this
+#### Think about how you want users to use this
+
+We also want to let users edit a generated site, then publish that site.
+
+1. I write markdown files into a dir.
+1. I generate a local site with --generate [path_to_site]
+1. I run bloggen --publish [path_to_generated_site]
+   -> if there is no site here, we tell the user there is no site here.
+
+### For now:
+
+    Generate will create a static site at the location where it was called
+    generate can take a dir to md files
+
+    - User must generate a site before they publish it.
+    - generate must create a static-site dir
+    	-[x] generate must create dirs data, notes, scripts
+    	-[x] generate must create files robot.txt, index.html
+    		-[x] generate must fill files with correct content
+    		-[x] content must live in config or constants file
+    -[x] generate must put html versions of markdown files into the notes dir
+
+    -[] publish must find a static-site dir
 
 This does not seem to work.
 I think you have to --publish [path_to_local_static_site]

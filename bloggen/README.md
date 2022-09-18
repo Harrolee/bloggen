@@ -36,3 +36,15 @@ _Remove named page from static site_
 
 _Destroy site and bucket_
 `bloggen destroy`
+
+## Lee:
+
+push to testpypi:
+
+1. build the new version:
+   `poetry build`
+2. publish:
+   `poetry publish -r testpypi -u harolee -p`
+
+pull from testpypi:
+`pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple bloggen`
