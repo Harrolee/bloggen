@@ -1,5 +1,7 @@
 import os
+from pyclbr import Function
 from sys import stderr, exit
+from typing import Dict
 import markdown
 import bs4
 from pathlib import Path
@@ -39,12 +41,15 @@ def __html_file(input_file:str,output_dir:Path):
     with open(outfile, 'w') as f:
         f.write(html)
 
-def index(path_to_site):
-    """
-    Scans generated html files and creates links to them on the index.html page.
-    For every html in ../notes dir of static site, add link to index
-    This function assumes that there are notes in the ../static-site/notes dir
-    """
+def index(path_to_site: Path):
+    cook_soup(path_to_site, recipe=index_md_files)
+
+def prep_for_hosting(path_to_static_site:Path, notes_root:str, ):
+    # access config file
+    # switch_index_references(notes_root)
+    cook_soup(path_to_static_site, prep_for_cloud, ingredients={'notes_root': notes_root})
+
+def cook_soup(path_to_site: Path, recipe:Function, ingredients:Dict={}):
     path_to_posts_dir = Path.joinpath(path_to_site,'notes')
     path_to_index = Path.joinpath(path_to_site,'index.html')
     with open(path_to_index) as in_f:
@@ -52,29 +57,43 @@ def index(path_to_site):
         soup = bs4.BeautifulSoup(txt, features="html.parser")
     post_names:list[str] = sorted([note.name for note in Path.iterdir(path_to_posts_dir)])
     for post_name in post_names:
-        new_li = soup.new_tag('li')
-        new_anchor = soup.new_tag('a', href=os.path.join('notes',post_name))
-        post_name = post_name.removesuffix('.html')
-        new_anchor.attrs['id'] = post_name.replace(' ','')
-        new_anchor.string = post_name
-        new_li.append(new_anchor)
-        soup.body.ul.append(new_li)
+        ingredients['post_name'] = post_name
+        recipe(ingredients, soup)
     with open(path_to_index, "w") as out_f:
-        out_f.write(str(soup))
+        out_f.write(str(soup))  
 
-def prep_for_hosting(notes_root:str, ):
-    # access config file
-    switch_index_references(notes_root)
+def index_md_files(data:dict, soup):
+    """
+    Scans generated html files and creates links to them on the index.html page.
+    For every html in ../notes dir of static site, add link to index
+    This function assumes that there are notes in the ../static-site/notes dir
+    """
+    post_name = data['post_name']
+    new_li = soup.new_tag('li')
+    new_anchor = soup.new_tag('a', href=os.path.join('notes',post_name))
+    post_name = post_name.removesuffix('.html')
+    new_anchor.attrs['id'] = post_name.replace(' ','')
+    new_anchor.string = post_name
+    new_li.append(new_anchor)
+    soup.body.ul.append(new_li)
 
-# Please refactor to take a callback. Follow this guide: # https://stackoverflow.com/questions/55751368/python-how-to-pass-to-a-function-argument-type-of-a-class-object-typing
+def prep_for_cloud(data:dict, soup):
+    post_name = data['post_name']
+    notes_root = data['notes_root']
+    tag_id = post_name.removesuffix('.html').replace(' ','')
+    anchor:bs4.Tag = soup.find(id=tag_id)
+    if anchor:
+        anchor.attrs['href'] = notes_root + post_name.replace(' ','%20')
+    else:
+        print(f"Index.html linking won't work. Could not find a tag with tag_id '{tag_id}'. As a result, I could not update the link.",stderr)
+
 def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir()):
-    path_to_posts_dir = os.path.join(path_to_site,'notes')
-    path_to_index = os.path.join(path_to_site,'index.html')
+    path_to_posts_dir = Path.joinpath(path_to_site,'notes')
+    path_to_index = Path.joinpath(path_to_site,'index.html')
     with open(path_to_index) as in_f:
         txt = in_f.read()
         soup = bs4.BeautifulSoup(txt, features="html.parser")
-    os.remove(path_to_index)
-    post_names:list[str] = sorted(os.listdir(path_to_posts_dir))
+    post_names:list[str] = sorted([note.name for note in Path.iterdir(path_to_posts_dir)])
     for post_name in post_names:
         tag_id = post_name.removesuffix('.html').replace(' ','')
         anchor:bs4.Tag = soup.find(id=tag_id)
@@ -83,7 +102,7 @@ def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir(
         else:
             print(f"Index.html linking won't work. Could not find a tag with tag_id '{tag_id}'. As a result, I could not update the link.",stderr)
 
-    with open(path_to_index, "x") as out_f:
+    with open(path_to_index, "w") as out_f:
         out_f.write(str(soup))    
 
 def static_site(static_site_root: Path):
@@ -100,8 +119,7 @@ def static_site(static_site_root: Path):
     if Path.exists(static_site_root):
         print(f'static-site dir already exists at ${static_site_root}. Canceling generation.')
         exit()
-    
-    # make dirs
+        
     os.mkdir(static_site_root)
     os.mkdir(Path.joinpath(static_site_root, 'notes'))
     os.mkdir(Path.joinpath(static_site_root, 'data'))

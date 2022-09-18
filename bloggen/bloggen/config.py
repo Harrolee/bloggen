@@ -103,7 +103,6 @@ class Configure:
             return False
         else:
             config_path = Path(user_config['data']['credentials'])
-            print(config_path.write_text)
             if not Path.exists(config_path):
                 print(f"Could not find a file at {user_config['data']['credentials']}")
                 print("Please set the path to your credential file with this command: bloggen --config credential=path/to/credential")

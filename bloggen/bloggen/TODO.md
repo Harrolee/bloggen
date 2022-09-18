@@ -1,39 +1,22 @@
 # Bugs:
 
-### How do you publish a site?
+### files in .bloggen dir
 
-#### Think about how you want users to use this
-
-We also want to let users edit a generated site, then publish that site.
-
-1. I write markdown files into a dir.
-1. I generate a local site with --generate [path_to_site]
-1. I run bloggen --publish [path_to_generated_site]
-   -> if there is no site here, we tell the user there is no site here.
-
-### For now:
-
-    Generate will create a static site at the location where it was called
-    generate can take a dir to md files
-
-    - User must generate a site before they publish it.
-    - generate must create a static-site dir
-    	-[x] generate must create dirs data, notes, scripts
-    	-[x] generate must create files robot.txt, index.html
-    		-[x] generate must fill files with correct content
-    		-[x] content must live in config or constants file
-    -[x] generate must put html versions of markdown files into the notes dir
-
-    -[] publish must find a static-site dir
-
-This does not seem to work.
-I think you have to --publish [path_to_local_static_site]
+These should not contain my personal information.
+Maybe they shouldn't even exist.
+Up to you to implement/consider
 
 # How
 
 Make the class that changes links a class that references the provider defined in a central config file
 
 # Next
+
+## Publish cleanup
+
+accept no arguments
+
+## Stucture derivation
 
 The user provides a notes directory.
 Bloggen should derive the structure of the user's blog from the notes dir.
@@ -141,3 +124,15 @@ As blog:
 	IoC: let users associate js with their notes
 	- maybe even with note structures?
 ```
+
+## Lee:
+
+push to testpypi:
+
+1. build the new version:
+   `poetry build`
+2. publish:
+   `poetry publish -r testpypi -u harolee -p`
+
+pull from testpypi:
+`pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple bloggen`

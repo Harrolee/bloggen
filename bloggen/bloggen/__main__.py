@@ -48,7 +48,10 @@ def main():
                     if args.publish == 'no_args':
                         site.publish()
                     else:
-                        site.publish(args.publish)
+                        path_to_static_site = args.publish
+                        if path_to_static_site[:3] == '../':
+                            path_to_static_site = clean_parent(path_to_static_site)
+                        site.publish(path_to_static_site)
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Create a static site!")
@@ -58,7 +61,7 @@ def create_parser():
     parser.add_argument('-g','--generate', help="Builds static site locally. Provide path to md directory.", nargs='?', const='no_args')
     parser.add_argument('--remove', help="Removes a file from bucket.")
     parser.add_argument('--sync', help="Uploads directory to bucket.")
-    parser.add_argument('-p','--publish', help="Uploads static site to bucket.", action='store_const', const='no_args')
+    parser.add_argument('-p','--publish', help="Uploads static site to bucket.", nargs='?', const='no_args')
     return parser
 
 def clean_parent(path: str):

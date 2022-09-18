@@ -12,8 +12,7 @@ class Site:
         self.client = storage.Client()
         self.bucket_name = self.user_config.active_config['data']['buckets'][0]
         self.host_url = 'https://storage.cloud.google.com/'
-        self.bucket = None
-        self.retrieve_bucket(self.bucket_name)
+        self.bucket = self.retrieve_bucket(self.bucket_name)
         # below line assumes that the user generates a static site in their cwd
         self.static_site_root = Path(os.getcwd())
 
@@ -27,13 +26,14 @@ class Site:
             f.write(html)
         blob = self.bucket.blob(outfile)
         blob.upload_from_filename(outfile)
-
-    def publish(self, path_to_static_site:str=generate.get_static_site_dir()):
+                                            # if no param is passed, assume that the user wants to publish the current dir of markdown files as a static-site
+    def publish(self, path_to_static_site:Path): # path_to_static_site:str=generate.get_static_site_dir()
+        self.static_site_root = path_to_static_site
         # need to prepare for hosting site:
             # replace all local hrefs with refs to files on cloud.
             # Will follow this pattern: https://storage.cloud.google.com/first-bloggen-bucket/static-site/notes/test%20copy%202.html
         notes_root = f"{self.host_url}{self.bucket_name}/static-site/notes/"
-        generate.prep_for_hosting(notes_root)
+        generate.prep_for_hosting(self.static_site_root, notes_root)
 
         # learn which bucket to use
         target_bucket_name = self.user_config.active_config['data']['buckets'][0] if len(self.user_config.active_config['data']['buckets']) < 2 else input(f"Which bucket? {self.user_config.active_config['data']['buckets']}")
@@ -42,7 +42,7 @@ class Site:
 
         if target_bucket:
             print('uploading bucket')
-            self.upload_site(path_to_static_site)
+            self.upload_site(path_to_static_site.as_posix())
             bucket_url = f"{self.host_url}{target_bucket_name}/static-site/index.html"
             print(f'Your notes are available as html at {bucket_url}')
         else:
@@ -73,15 +73,12 @@ class Site:
             for name in files:
                 print(f'uploading file {name}')
                 root_index = path_to_dir.find(root)
-                print(root_index)
                 blob_path = os.path.join(path, name).replace('\\','/')[root_index:]
-                print('blob path: '+blob_path)
                 blob = self.bucket.blob(blob_path)
                 local_path = os.path.join(path, name)
                 blob.upload_from_filename(local_path)
 
     def upload_files(self, path_to_dir) -> str:
-        print(path_to_dir)
         for path, _, files in os.walk(path_to_dir):
             for name in files:
                 print(f'uploading {name}')
