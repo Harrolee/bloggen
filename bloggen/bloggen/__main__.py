@@ -1,6 +1,7 @@
 import os
 from bloggen.config import Configure
 from bloggen.static_site import Site 
+from bloggen.site_info import Site_Info
 import sys
 import argparse
 import pathlib
@@ -43,6 +44,7 @@ def main():
                         path_to_md_dir: str = args.generate
                         if path_to_md_dir[:3] == '../':
                             path_to_md_dir = clean_parent(path_to_md_dir)
+                        site_info = Site_Info(path_to_md_dir, config.active_config["name"])
                         site.generate(pathlib.Path(path_to_md_dir))
                 elif args.publish:
                     if args.publish == 'no_args':

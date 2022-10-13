@@ -28,7 +28,7 @@
     "notes": [
       {
         "id": "note_user_uuid1",
-        "subject": "State Fair",
+        "subject": ["State Fair"],
         "content": "link_to_content",
         "tags": ["fun", "friends"],
         "metadata": [

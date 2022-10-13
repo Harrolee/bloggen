@@ -52,7 +52,7 @@ class Site:
         self.static_site_root = Path.joinpath(path_to_md_dir.parent,'static-site')
         generate.static_site(self.static_site_root)
         generate.html_files(path_to_md_dir, self.static_site_root)
-        generate.index(self.static_site_root)
+        generate.index_html(self.static_site_root)
         print(f'See your local site at {os.path.join(self.static_site_root,"index.html")}')
 
     def get_bucket(self, name):

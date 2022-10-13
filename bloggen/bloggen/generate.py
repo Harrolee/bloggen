@@ -41,7 +41,7 @@ def __html_file(input_file:str,output_dir:Path):
     with open(outfile, 'w') as f:
         f.write(html)
 
-def index(path_to_site: Path):
+def index_html(path_to_site: Path):
     cook_soup(path_to_site, recipe=index_md_files)
 
 def prep_for_hosting(path_to_static_site:Path, notes_root:str, ):
@@ -107,7 +107,6 @@ def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir(
 
 def static_site(static_site_root: Path):
     """
-    later --> Have object of static site in memory
     1. Generate static site directory structure
         1a. create index.html file
         1b. Create open html tags

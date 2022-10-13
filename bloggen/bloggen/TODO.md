@@ -51,21 +51,7 @@ Steps:
 
 _These steps can happen in parallel_
 
-# Next next
 
-Bloggen generates static site from code. At present, bloggen only populates a template.
-
-## Why?
-
-publishing the package with a template inside of it feels bad.
-
-### Why?
-
-I don't want to add weight to the package.
-
-### What if you did?
-
-The package would weigh 44k more. Also, it would contain an extra folder. I would feel like my perfect system is less clean.
 
 ### Potential pros of leaning in to it?
 
