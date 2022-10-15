@@ -1,5 +1,5 @@
 from datetime import datetime
-from pathlib import PurePath
+from pathlib import PurePath, Path
 import os
 from typing import Dict, List
 import uuid
@@ -26,24 +26,24 @@ class Site_Info:
         return [ele['id'] for ele in ids_paths]
 
     def get_site_info(self) -> dict():
-        node_paths = self.__get_sub_directories(self.target_dir)
-        node_ids = self.generate_ids(node_paths, 'blog', self.user)
-        
-        note_paths = self.__get_filepaths(self.target_dir)
-        note_ids, noteIds_notepaths = self.generate_ids(note_paths, 'note', self.user, True)
-        
-        # index object
-        self.__create_index(self.target_dir, node_ids, note_ids)
-        # TODO rootnode and nodes list should contain node ids, not folder names
-        print(self.index)
 
-        # relationship object
-        # TODO
-        self.find_relationships()
+        relationship_graph, data, index = self.build_site_info(self.target_dir)
+        print(relationship_graph)
+        # node_paths = self.__get_sub_directories(self.target_dir)
+        # node_ids = self.generate_ids(node_paths, 'blog', self.user)
+        
+        # note_paths = self.__get_filepaths(self.target_dir)
+        # note_ids, noteIds_notepaths = self.generate_ids(note_paths, 'note', self.user, True)
+        
+        # self.__create_index(self.target_dir, node_ids, note_ids)
 
-        # return a site_info dict
-        self.create_data(self.user, self.index, noteIds_notepaths)
-        print(self.data)
+        # # relationship object
+        # # TODO
+        # self.find_relationships()
+        # # the first time ids are generates
+
+        # # return a site_info dict
+        # self.create_data(self.user, self.index, noteIds_notepaths)
 
     def __create_index(self, target_dir, node_ids, note_ids: List[str]):
         """
@@ -63,10 +63,22 @@ class Site_Info:
         consider either bfs or dfs for this task
         use os.scandir() and __get_sub_directories() as an example
         """
-        # - create relationship graph
+        self.target_dir
+        root = self.index['rootNode']
+        # path of root?
+        self.local_relationships(self.target_dir)
+
+        
+
+        # notes that are children of this blog
+
         pass
 
-
+    def local_relationships(self,path):
+        blogs = self.__get_sub_directories(path)
+        # find local dirs
+        # find local notes
+        pass
 
     def create_data(self, user, index, noteIds_notepaths):
         """
@@ -90,6 +102,16 @@ class Site_Info:
             'metadata': self.note_metadata(path)
         }
 
+    def create_note_new(self, id, path:Path):
+        directive_data = self.extract_data(path.absolute())
+        return {
+            'id': id,
+            'content': path,
+            'subjects': directive_data['subjects'],
+            'tags':directive_data['tags'],
+            'metadata': self.note_metadata(path)
+        }
+
     def node_metadata(self):
         """
         As you decide to add more metadata objects, return more objects from here
@@ -103,12 +125,63 @@ class Site_Info:
         style = 'default' # TODO extract style from the file. It is a directive. use extract_style()
         return {'timestamp': datetime.now().strftime(timestamp_format),'style':style}
 
+    def build_site_info(self, dir_name) -> list[str]:
+        # figure out the root node.
+        # root node will be missing from site_info json rn
+        
+
+        def recurse_dirs(relationship_graph, data, index, blog_id: str, dir: Path):
+            print(f'called with blog_id {blog_id}')
+            recursion_queue = []
+            for f in dir.iterdir():
+                if f.is_dir():
+                    print(f.name)
+                    child_blog_id = self.generate_id(self.user, "blog")
+                    index['nodes'].append(child_blog_id)
+                    data['nodes'].append(child_blog_id)
+                    recursion_queue.append((child_blog_id,f))
+                    print(f'for {f.name}, blog_id is {child_blog_id}')
+                elif f.name.endswith('.md'):
+                    print(f.name)
+                    print(blog_id)
+                    id = self.generate_id(self.user, "note")
+                    path = f.absolute()
+                    relationship_graph[blog_id]['notes'] = id
+                    index['notes'].append(id)
+                    data['notes'].append(self.create_note_new(id, path))
+
+                    # ids_paths = [{ 'id': self.generate_id(self.user, "note"), 'path': f.absolute } for f in dir.iterdir()]
+                    # ids_paths['id']
+            for blog_id,dir in recursion_queue:
+                relationship_graph, data, index = recurse_dirs(relationship_graph, data, index, blog_id, dir)
+
+            return relationship_graph, data, index
+
+        # for f in path.iterdir():
+        #     if f.is_dir():
+        #         # make id from p
+        #         blog_id = self.generate_id(self.user, "blog")
+        #         {blog_id: {
+        #             'blogs': [],
+        #             'notes': []
+        #         }}
+        #         # build relationship object
+
+        #     # build child subdirs 
+        path = Path(dir_name)
+        root_id = 'the root node'
+        return recurse_dirs({root_id: {'blogs': [], 'notes': []}}, {"nodes": [], "notes": []}, {"nodes": [],"notes": []}, root_id, path)
+
     def __get_sub_directories(self, dir_name) -> list[str]:
         sub_dirs = [f.name for f in os.scandir(dir_name) if f.is_dir()]
         return sub_dirs
     
     def __get_filepaths(self, dir_name) -> list[str]:
         sub_files = [f.path for f in os.scandir(dir_name) if f.is_file() and f.name.endswith('.md') ]
+        return sub_files
+    
+    def __get_child_files(self, dir_name) -> list[str]:
+        sub_files = [f.name for f in os.scandir(dir_name) if f.is_file() and f.name.endswith('.md') ]
         return sub_files
     
     def generate_id(self, user, prefix: str) -> str:
