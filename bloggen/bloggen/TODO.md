@@ -51,8 +51,6 @@ Steps:
 
 _These steps can happen in parallel_
 
-
-
 ### Potential pros of leaning in to it?
 
 I could plop the template into the user's filesystem. Users could edit the template directly or make a copy of the template. Bloggen could import user-created templates, store them as `templates` in a json, and let the user add their template names to `"metadata":{template-style:"Kevin's Template"}`.
