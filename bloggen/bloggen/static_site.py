@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Dict
 from google.cloud import storage
 import os
 import markdown
@@ -48,9 +49,9 @@ class Site:
         else:
             print("Bucket not insantiated",file=sys.stderr)
 
-    def generate(self, path_to_md_dir: Path):
+    def generate(self, path_to_md_dir: Path, site_info: Dict):
         self.static_site_root = Path.joinpath(path_to_md_dir.parent,'static-site')
-        generate.static_site(self.static_site_root)
+        generate.static_site(self.static_site_root, site_info)
         generate.html_files(path_to_md_dir, self.static_site_root)
         generate.index_html(self.static_site_root)
         print(f'See your local site at {os.path.join(self.static_site_root,"index.html")}')

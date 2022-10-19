@@ -1,3 +1,4 @@
+import json
 import os
 from pyclbr import Function
 from sys import stderr, exit
@@ -105,7 +106,7 @@ def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir(
     with open(path_to_index, "w") as out_f:
         out_f.write(str(soup))    
 
-def static_site(static_site_root: Path):
+def static_site(static_site_root: Path, site_info: Dict):
     """
     1. Generate static site directory structure
         1a. create index.html file
@@ -126,5 +127,14 @@ def static_site(static_site_root: Path):
 
     with open(Path.joinpath(static_site_root, 'robots.txt'), 'w+') as f:
         f.writelines(['User-agent: *\n','Disallow: /'])
+    
+    # create index.html file
     reference_index_path = Path.joinpath(pathlib.Path(__file__).parent, '.bloggen/index.html')
     shutil.copy(reference_index_path,Path.joinpath(static_site_root, 'index.html'))
+
+    print(site_info)
+    f = open(Path.joinpath(static_site_root, 'data/site_info.json'), 'w+')
+    json.dump(site_info, f)
+    f.close()
+    # with open(Path.joinpath(static_site_root, 'data/site_info.json'), 'w+')  as f:
+    #     json.dump(site_info, f)
