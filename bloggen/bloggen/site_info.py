@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 import uuid
 
 directive_symbol_start = '<!--$'
@@ -16,8 +15,8 @@ class Site_Info:
         self.site_info = dict()
         self.get_site_info()
 
-    def generate_ids(self, paths: List, id_tag: str, username: str, return_mapping: bool=False) -> List[str]:
-        ids_paths: List[Dict[str,str]] = [{ 'id': self.generate_id(username, id_tag), 'path': path } for path in paths]
+    def generate_ids(self, paths: list, id_tag: str, username: str, return_mapping: bool=False) -> List[str]:
+        ids_paths: list[dict[str,str]] = [{ 'id': self.generate_id(username, id_tag), 'path': path } for path in paths]
         if return_mapping:
             return [ele['id'] for ele in ids_paths], ids_paths
         return [ele['id'] for ele in ids_paths]
@@ -82,17 +81,18 @@ class Site_Info:
     def extract_data(self, filepath: str, ):
         with open(filepath, 'r') as f:
             contents = f.read()
-        directive_data: Dict[str: [str]] = self.get_directives(contents, filepath)
+        directive_data: dict[str: [str]] = self.get_directives(contents, filepath)
         return directive_data
         # TODO add support for directives that are commands
         # return self.execute_commands(directive_data)
 
-    def get_directives(self, contents: str, filepath: str) -> Dict[str, List[str]]:
+    def get_directives(self, contents: str, filepath: str) -> dict[str, list[str]]:
         """
         At present, directive commands do not have context. They are simply pieces of text that are ignored by html
         """
         supported_directives = [s['name'] for s in self.supported_directives]
         directives = {directive:set() for directive in supported_directives}
+        
         substr_start = 0
 
         directive_index = contents.find(directive_symbol_start, substr_start)
@@ -101,20 +101,32 @@ class Site_Info:
             directive_end_index = contents.find(directive_symbol_end, colon_index)
             directive_start = directive_index + len(directive_symbol_start)
             directive: str = contents[directive_start:colon_index].strip(' ').lower()
-            directive_command: str = contents[colon_index+1:directive_end_index].strip(' ').split(',')
+            commands: list[str] = contents[colon_index+1:directive_end_index].split(',')
+            commands = [command.strip(' ') for command in commands]
+            # print(f'directive_command is {commands}')
 
             if directive not in supported_directives:
                 print(f'{directive} is not a supported directive. Found {directive} in {filepath}')
             else:
-                for command in directive_command:
+                for command in commands:
                     directives.setdefault(directive, set()).add(command)
+                    # else:
+                    #     directives[directive] = set()
+                    #     directives[directive].add(command)
+                    
+                    # print(f'directives: {directives}, command was {command}')
+                    # directives.setdefault(directive, set()).add(command)
 
             substr_start = directive_end_index
             directive_index = contents.find(directive_symbol_start, substr_start)
-
+        
+        # we cannot write sets to json. This is a hacky solution to convert sets to lists
+        for key in directives.keys():
+                directives[key] = list(directives[key])
+        print(f'directives: {directives}')
         return directives
 
-    def execute_commands(self, found_directives: Dict[str, List[str]]):
+    def execute_commands(self, found_directives: dict[str, list[str]]):
         results = {}
         self.supported_directives
         for supported_directive in self.supported_directives: # [{'name':'subjects', 'function': self.extract_subjects}, {'name':'tags', 'function': self.extract_tags}]
@@ -133,7 +145,7 @@ class Site_Info:
     def extract_style(self, style):
         return style
 
-    # def extract_data(self, nextraction_functions: Dict(str,List(Function))):
+    # def extract_data(self, nextraction_functions: dict(str,list(Function))):
     #     # search for the symbol
 
     #     # goal: retrieve directives and their content

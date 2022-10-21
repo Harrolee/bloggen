@@ -14,6 +14,8 @@ class Site:
         self.bucket_name = self.user_config.active_config['data']['buckets'][0]
         self.host_url = 'https://storage.cloud.google.com/'
         self.bucket = self.retrieve_bucket(self.bucket_name)
+        self.set_privacy(public=True)
+        # default setting all buckets to public
         # below line assumes that the user generates a static site in their cwd
         self.static_site_root = Path(os.getcwd())
 
@@ -78,6 +80,7 @@ class Site:
                 blob = self.bucket.blob(blob_path)
                 local_path = os.path.join(path, name)
                 blob.upload_from_filename(local_path)
+                blob.make_public()
 
     def upload_files(self, path_to_dir) -> str:
         for path, _, files in os.walk(path_to_dir):
@@ -93,6 +96,7 @@ class Site:
             return self.get_bucket(bucket_name)
         except:
             bucket = self.make_bucket(bucket_name)
-            print(f'Creating a new bucket named {bucket_name}')
-            time.sleep(4)
+            delay = 10
+            print(f'Creating a new bucket named {bucket_name}. This will take {delay} seconds')
+            time.sleep(delay)
             return bucket

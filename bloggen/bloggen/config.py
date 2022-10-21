@@ -66,7 +66,10 @@ class Configure:
     
     def update_user_config(self, key, value):
         updated_config = self.active_config
-        updated_config['data'][key] = value
+        if type(updated_config['data'][key]) is list:
+            updated_config['data'][key].append(value)
+        else: 
+            updated_config['data'][key] = value
         with open(self.config_path) as f:
             config = json.load(f)
         for i, user_config in enumerate(config):
@@ -85,14 +88,16 @@ class Configure:
             'data': {
                 'backend': 'gcp',
                 "credentials": "path_to_credentials",
-                "buckets": []
+                "buckets": [],
+                "project": '',
             }
         }
         new_config['name'] = input("Name: ")
         new_config['data']['credentials'] = input("Path to your GCP credentials json: ")
-        new_config['data']['buckets'].append(input("Name of GCP Bucket: ").lower().replace(' ', '-'))
+        new_config['data']['buckets'].append(input("Name of GCP Bucket (does not have to exist): ").lower().replace(' ', '-'))
+        new_config['data']['project'] = input("Name of GCP Project (project must exist): ").lower().replace(' ', '-')
         self.add_user_config(new_config)
-
+        self.set_active_config(new_config['name'])
 
     def add_bucket(self):
         pass
@@ -111,5 +116,6 @@ class Configure:
 
     def apply_config(self, config):
         # set credentials of blog host 
+        print(config)
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = config['data']['credentials']
         os.environ['GCLOUD_PROJECT'] = config['data']['project']
