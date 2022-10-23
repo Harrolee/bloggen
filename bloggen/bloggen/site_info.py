@@ -15,7 +15,7 @@ class Site_Info:
         self.site_info = dict()
         self.get_site_info()
 
-    def generate_ids(self, paths: list, id_tag: str, username: str, return_mapping: bool=False) -> List[str]:
+    def generate_ids(self, paths: list, id_tag: str, username: str, return_mapping: bool=False) -> list[str]:
         ids_paths: list[dict[str,str]] = [{ 'id': self.generate_id(username, id_tag), 'path': path } for path in paths]
         if return_mapping:
             return [ele['id'] for ele in ids_paths], ids_paths
@@ -23,6 +23,7 @@ class Site_Info:
 
     def get_site_info(self) -> dict():
         relationship_graph, data, index = self.build_site_info(self.target_dir)
+        print(index)
         self.site_info = { "relationship_graph": relationship_graph, "data": data, "index": index}
 
     def create_note(self, id, path:Path):
@@ -48,16 +49,21 @@ class Site_Info:
         style = 'default' # TODO extract style from the file. It is a directive. use extract_style()
         return {'timestamp': datetime.now().strftime(timestamp_format),'style':style}
 
-    def build_site_info(self, dir_name) -> list[str]:
+    def build_site_info(self, input_path) -> list[str]:
 
         def recurse_dirs(relationship_graph, data, index, blog_id: str, dir: Path):
+            
+            # is the root node getting recorded at all?
+            # if not index['rootNode']:
+            #     print('adding rootNode')
+            #     index['rootNode']
             relationship_graph[blog_id] = {'blogs': [], 'notes': []}
             recursion_queue = []
             for f in dir.iterdir():
                 if f.is_dir():
                     child_blog_id = self.generate_id(self.user, "blog")
                     index['blogs'].append(child_blog_id)
-                    data['blogs'].append(child_blog_id)
+                    data['blogs'][child_blog_id] = {'name': f.name}
                     relationship_graph[blog_id]['blogs'].append(child_blog_id)
                     recursion_queue.append((child_blog_id,f))
                 elif f.name.endswith('.md'):
@@ -72,8 +78,8 @@ class Site_Info:
             return relationship_graph, data, index
 
         root_id = self.generate_id(self.user, "blog")
-        path = Path(dir_name)
-        return recurse_dirs({}, {"blogs": [], "notes": []}, {"blogs": [],"notes": []}, root_id, path)
+        path = Path(input_path)
+        return recurse_dirs(relationship_graph={}, data={"blogs": {root_id: {'name': path.name}}, "notes": []}, index={"blogs": [],"notes": [], "rootNode":root_id}, blog_id=root_id, dir=path)
     
     def generate_id(self, user, prefix: str) -> str:
         return f'{prefix}_{user}_{uuid.uuid4().hex[:5]}'

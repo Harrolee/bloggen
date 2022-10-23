@@ -38,22 +38,24 @@ def main():
                 if args.add:
                     site.add(args.add)
                 elif args.generate:
-                    if args.generate == 'no_args':
-                        site.generate()
-                    else:
-                        path_to_md_dir: str = args.generate
-                        if path_to_md_dir[:3] == '../':
-                            path_to_md_dir = clean_parent(path_to_md_dir)
-                        site_info = Site_Info(path_to_md_dir, config.active_config["name"])
-                        site.generate(pathlib.Path(path_to_md_dir), site_info.site_info)
+                    # TODO
+                    # if args.generate == 'no_args':
+                    #     site.generate()
+                    # else:
+                    path_to_md_dir: str = args.generate
+                    if path_to_md_dir[:3] == '../':
+                        path_to_md_dir = clean_parent(path_to_md_dir)
+                    site_info = Site_Info(path_to_md_dir, config.active_config["name"])
+                    site.generate(pathlib.Path(path_to_md_dir), site_info.site_info)
                 elif args.publish:
-                    if args.publish == 'no_args':
-                        site.publish()
-                    else:
-                        path_to_static_site = args.publish
-                        if path_to_static_site[:3] == '../':
-                            path_to_static_site = clean_parent(path_to_static_site)
-                        site.publish(path_to_static_site)
+                    # TODO
+                    # if args.publish == 'no_args':
+                    #     site.publish()
+                    # else:
+                    path_to_static_site = args.publish
+                    if path_to_static_site[:3] == '../':
+                        path_to_static_site = clean_parent(path_to_static_site)
+                    site.publish(pathlib.Path(path_to_static_site))
 
 def create_parser():
     parser = argparse.ArgumentParser(description="Create a static site!")

@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from typing import Dict
 from google.cloud import storage
@@ -14,7 +15,7 @@ class Site:
         self.bucket_name = self.user_config.active_config['data']['buckets'][0]
         self.host_url = 'https://storage.cloud.google.com/'
         self.bucket = self.retrieve_bucket(self.bucket_name)
-        self.set_privacy(public=True)
+        # self.set_privacy(public=True)
         # default setting all buckets to public
         # below line assumes that the user generates a static site in their cwd
         self.static_site_root = Path(os.getcwd())
@@ -35,7 +36,8 @@ class Site:
         # need to prepare for hosting site:
             # replace all local hrefs with refs to files on cloud.
             # Will follow this pattern: https://storage.cloud.google.com/first-bloggen-bucket/static-site/notes/test%20copy%202.html
-        notes_root = f"{self.host_url}{self.bucket_name}/static-site/notes/"
+
+        notes_root = f"{self.host_url}{self.bucket_name}/static-site/{self.get_root_blog_name()}"
         generate.prep_for_hosting(self.static_site_root, notes_root)
 
         # learn which bucket to use
@@ -53,9 +55,10 @@ class Site:
 
     def generate(self, path_to_md_dir: Path, site_info: Dict):
         self.static_site_root = Path.joinpath(path_to_md_dir.parent,'static-site')
-        generate.static_site(self.static_site_root, site_info)
-        generate.html_files(path_to_md_dir, self.static_site_root)
-        generate.index_html(self.static_site_root)
+        generate.static_site_structure(self.static_site_root, site_info)
+        generate.blog_structure(self.static_site_root, site_info)
+        generate.blog_notes(path_to_md_dir, self.static_site_root)
+        generate.index_html(self.static_site_root, self.get_root_blog_name())
         print(f'See your local site at {os.path.join(self.static_site_root,"index.html")}')
 
     def get_bucket(self, name):
@@ -100,3 +103,15 @@ class Site:
             print(f'Creating a new bucket named {bucket_name}. This will take {delay} seconds')
             time.sleep(delay)
             return bucket
+
+    def get_root_blog_name(self, site_info=None):
+        if not site_info:
+            site_info = self.import_site_info()
+        root_id = site_info['index']['rootNode']
+        return site_info['data']['blogs'][root_id]['name']
+
+    def import_site_info(self):
+        site_info_path = Path.joinpath(self.static_site_root, 'data/site_info.json')
+        with open(site_info_path, 'r') as f:
+            site_info = json.load(f)
+        return site_info
