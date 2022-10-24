@@ -40,18 +40,37 @@ def blog_structure(output_path, site_info):
     recurse(root_blog_id, blog_dir)
 
 def blog_notes(input_path:Path, output_root_dir):
-    for child in input_path.iterdir():
-        if child.is_dir():
-            relative_path = child.name
-            html_files(child, Path.joinpath(output_root_dir, relative_path))
+    #TODO find a way to put the first node in the while loop before
+    output_path = Path.joinpath(output_root_dir, input_path.name)
+    html_files(input_path, output_path)
+    input_path_queue = [(input_path, output_path)]
+    
+    while len(input_path_queue) > 0:
+        input_path, output_path = input_path_queue.pop()
+        print(f'parent of erroring child: {input_path}')
+        input_subdirs = [x for x in input_path.iterdir() if x.is_dir()]
+        print(f'subdirs: {input_subdirs}')
+        subdirs_that_are_parents = [x for x in input_subdirs if has_children(x)]
+        print('subdirs_that_are_parents: ',subdirs_that_are_parents)
+        for child in subdirs_that_are_parents:
+            output_path = Path.joinpath(output_path,child.name)
+            html_files(child, output_path)
+            input_path_queue.append((child, output_path))
+
+    
+def has_children(dir: Path):
+    children = [x for x in dir.iterdir()]
+    if len(children) > 0:
+        return True
+    return False
 
 def html_files(input_dir:Path, output_dir:Path):
     not_md = []
-    for path in Path.iterdir(input_dir):
-        filename = path.name
+    for file in Path.iterdir(input_dir):
+        filename = file.name
         if filename.endswith('.md'):
             print('adding note: '+ filename)
-            __html_file(Path.joinpath(input_dir,filename), Path.joinpath(output_dir))
+            __html_file(Path.joinpath(input_dir,filename), output_dir)
         else:
             not_md.append(filename)
     if not_md:
