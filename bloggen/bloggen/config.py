@@ -33,7 +33,11 @@ class Configure:
     def get_active_config(self):
         with open(self.config_path) as f:
             configs = json.load(f)
-        return list(filter(lambda config: config['active'] == True, configs))[0]
+        active_config_ls = list(filter(lambda config: config['active'] == True, configs))
+        if len(active_config_ls) == 0:
+            self.set_active_config('default')
+            return self.get_active_config()
+        return active_config_ls[0] 
 
     def set_active_config(self, name):
         """
@@ -103,14 +107,15 @@ class Configure:
         pass
 
     def valid_user_config(self, user_config):
+        error = "Please set the path to your credentials file with this command: bloggen --config credentials=path/to/credential"
         if not user_config['data']['credentials']:
-            print("Please set the path to your credential file with this command: bloggen --config credential=path/to/credential")
+            print(error)
             return False
         else:
             config_path = Path(user_config['data']['credentials'])
             if not Path.exists(config_path):
                 print(f"Could not find a file at {user_config['data']['credentials']}")
-                print("Please set the path to your credential file with this command: bloggen --config credential=path/to/credential")
+                print(error)
                 return False
             return True
 

@@ -13,9 +13,9 @@ class Site:
         self.user_config = user_config
         self.client = storage.Client()
         self.bucket_name = self.user_config.active_config['data']['buckets'][0]
-        self.host_url = 'https://storage.cloud.google.com/'
+        self.host_url = 'https://storage.googleapis.com/'
         self.bucket = self.retrieve_bucket(self.bucket_name)
-        # self.set_privacy(public=True)
+        self.set_privacy(public=True)
         # default setting all buckets to public
         # below line assumes that the user generates a static site in their cwd
         self.static_site_root = Path(os.getcwd())
@@ -37,8 +37,9 @@ class Site:
             # replace all local hrefs with refs to files on cloud.
             # Will follow this pattern: https://storage.cloud.google.com/first-bloggen-bucket/static-site/notes/test%20copy%202.html
 
-        notes_root = f"{self.host_url}{self.bucket_name}/static-site/{self.get_root_blog_name()}"
-        generate.prep_for_hosting(self.static_site_root, notes_root)
+        #cloud_notes_root = f"{self.host_url}{self.bucket_name}/static-site/{self.get_root_blog_name()}"
+        local_blog_root = self.get_root_blog_name()
+        generate.prep_for_hosting(self.static_site_root, local_blog_root)
 
         # learn which bucket to use
         target_bucket_name = self.user_config.active_config['data']['buckets'][0] if len(self.user_config.active_config['data']['buckets']) < 2 else input(f"Which bucket? {self.user_config.active_config['data']['buckets']}")

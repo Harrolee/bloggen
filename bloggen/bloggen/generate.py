@@ -18,11 +18,6 @@ def get_static_site_dir():
     return path.absolute().as_posix()
 
 def blog_structure(output_path, site_info):
-    
-    # def make_blog_dir(blog_id, output_path):
-    #     blog_name = site_info['data']['blogs'][blog_id]['name']
-    #     blog_dir = Path.joinpath(output_path, blog_name)
-    #     os.mkdir(blog_dir)
     def recurse(parent_blog_id, output_path):
         for blog_id in site_info['relationship_graph'][parent_blog_id]['blogs']:
             blog_name = site_info['data']['blogs'][blog_id]['name']
@@ -31,12 +26,9 @@ def blog_structure(output_path, site_info):
             recurse(blog_id, blog_dir)
     
     root_blog_id = site_info['index']['rootNode']
-    
-    # make_blog_dir(root_blog_id,output_path)
     blog_name = site_info['data']['blogs'][root_blog_id]['name']
     blog_dir = Path.joinpath(output_path, blog_name)
     os.mkdir(blog_dir)
-
     recurse(root_blog_id, blog_dir)
 
 def blog_notes(input_path:Path, output_root_dir):
@@ -47,11 +39,8 @@ def blog_notes(input_path:Path, output_root_dir):
     
     while len(input_path_queue) > 0:
         input_path, output_path = input_path_queue.pop()
-        print(f'parent of erroring child: {input_path}')
         input_subdirs = [x for x in input_path.iterdir() if x.is_dir()]
-        print(f'subdirs: {input_subdirs}')
         subdirs_that_are_parents = [x for x in input_subdirs if has_children(x)]
-        print('subdirs_that_are_parents: ',subdirs_that_are_parents)
         for child in subdirs_that_are_parents:
             output_path = Path.joinpath(output_path,child.name)
             html_files(child, output_path)
@@ -91,23 +80,26 @@ def __html_file(input_file:str,output_dir:Path):
         f.write(html)
 
 def index_html(path_to_site: Path, root_blog_name):
-    cook_soup(path_to_site, root_blog_name, recipe=index_md_files)
+    cook_soup(path_to_site, root_blog_name, recipe=index_md_files, ingredients={'blog_root': root_blog_name})
 
 def prep_for_hosting(path_to_static_site:Path, root_blog_name:str, ):
-    # access config file
-    # switch_index_references(notes_root)
-    print(f'notes root is: {root_blog_name}')
-    cook_soup(path_to_static_site, root_blog_name, prep_for_cloud, ingredients={'notes_root': root_blog_name})
+    # we need to get the dir names into the ingredients variable
+    cook_soup(path_to_static_site, root_blog_name, prep_for_cloud, ingredients={'blog_root': root_blog_name})
 
 def cook_soup(path_to_site: Path, root_blog_name, recipe:Function, ingredients:Dict={}):
+    """
+    Create a soup from the index file.
+    Retrieve the names of every note.
+    Apply a given recipe to the soup.
+    """
     path_to_posts_dir = Path.joinpath(path_to_site,root_blog_name)
     path_to_index = Path.joinpath(path_to_site,'index.html')
     with open(path_to_index) as in_f:
         txt = in_f.read()
         soup = bs4.BeautifulSoup(txt, features="html.parser")
-    post_names:list[str] = sorted([note.name for note in Path.iterdir(path_to_posts_dir)])
-    for post_name in post_names:
-        ingredients['post_name'] = post_name
+    note_names:list[str] = sorted([note.name for note in Path.iterdir(path_to_posts_dir)])
+    for note_name in note_names:
+        ingredients['post_name'] = note_name
         recipe(ingredients, soup)
     with open(path_to_index, "w") as out_f:
         out_f.write(str(soup))  
@@ -115,12 +107,13 @@ def cook_soup(path_to_site: Path, root_blog_name, recipe:Function, ingredients:D
 def index_md_files(data:dict, soup):
     """
     Scans generated html files and creates links to them on the index.html page.
-    For every html in ../notes dir of static site, add link to index
-    This function assumes that there are notes in the ../static-site/notes dir
+    For every html in blog root of static site, add link to index
+    This function assumes that there are notes in the ../static-site/{blog_root}
     """
     post_name = data['post_name']
+    blog_root = data['blog_root']
     new_li = soup.new_tag('li')
-    new_anchor = soup.new_tag('a', href=os.path.join('notes',post_name))
+    new_anchor = soup.new_tag('a', href=os.path.join(blog_root,post_name))
     post_name = post_name.removesuffix('.html')
     new_anchor.attrs['id'] = post_name.replace(' ','')
     new_anchor.string = post_name
@@ -128,32 +121,17 @@ def index_md_files(data:dict, soup):
     soup.body.ul.append(new_li)
 
 def prep_for_cloud(data:dict, soup):
+    """
+    Change anchor hrefs so that they use relative paths instead of absolute filepaths.
+    """
     post_name = data['post_name']
-    notes_root = data['notes_root']
+    blog_root = data['blog_root']
     tag_id = post_name.removesuffix('.html').replace(' ','')
     anchor:bs4.Tag = soup.find(id=tag_id)
     if anchor:
-        anchor.attrs['href'] = notes_root + post_name.replace(' ','%20')
+        anchor.attrs['href'] = f"{blog_root}/{ post_name.replace(' ','%20') }"
     else:
         print(f"Index.html linking won't work. Could not find a tag with tag_id '{tag_id}'. As a result, I could not update the link.",stderr)
-
-def switch_index_references(notes_root:str,path_to_site:str=get_static_site_dir()):
-    path_to_posts_dir = Path.joinpath(path_to_site,'notes')
-    path_to_index = Path.joinpath(path_to_site,'index.html')
-    with open(path_to_index) as in_f:
-        txt = in_f.read()
-        soup = bs4.BeautifulSoup(txt, features="html.parser")
-    post_names:list[str] = sorted([note.name for note in Path.iterdir(path_to_posts_dir)])
-    for post_name in post_names:
-        tag_id = post_name.removesuffix('.html').replace(' ','')
-        anchor:bs4.Tag = soup.find(id=tag_id)
-        if anchor:
-            anchor.attrs['href'] = notes_root + post_name.replace(' ','%20')
-        else:
-            print(f"Index.html linking won't work. Could not find a tag with tag_id '{tag_id}'. As a result, I could not update the link.",stderr)
-
-    with open(path_to_index, "w") as out_f:
-        out_f.write(str(soup))    
 
 def static_site_structure(static_site_root: Path, site_info: Dict):
     """

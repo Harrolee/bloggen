@@ -1,3 +1,5 @@
+## Do not remove files from .bloggen dir
+
 ## site.info
 
 ### Schema
