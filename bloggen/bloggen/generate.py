@@ -32,6 +32,9 @@ def blog_structure(output_path, site_info):
     recurse(root_blog_id, blog_dir)
 
 def blog_notes(input_path:Path, output_root_dir):
+    """
+    Converts md files to html files and deposits them in the output dir.
+    """
     #TODO find a way to put the first node in the while loop before
     output_path = Path.joinpath(output_root_dir, input_path.name)
     html_files(input_path, output_path)

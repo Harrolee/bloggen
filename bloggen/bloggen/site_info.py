@@ -33,7 +33,7 @@ class Site_Info:
             'content': path.as_uri(),
             'subjects': directive_data['subjects'],
             'tags':directive_data['tags'],
-            'metadata': self.note_metadata()
+            'metadata': self.note_metadata(directive_data['style'])
         }
 
     def node_metadata(self):
@@ -42,11 +42,11 @@ class Site_Info:
         """
         return {'timestamp': datetime.now().strftime(timestamp_format)}
     
-    def note_metadata(self):
+    def note_metadata(self, style):
         """
         As you decide to add more metadata objects, return more objects from here
         """
-        style = 'default' # TODO extract style from the file. It is a directive. use extract_style()
+        #style = 'default' # TODO extract style from the file. It is a directive. use extract_style()
         return {'timestamp': datetime.now().strftime(timestamp_format),'style':style}
 
     def build_site_info(self, input_path) -> list[str]:

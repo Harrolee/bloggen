@@ -59,6 +59,7 @@ class Site:
         generate.static_site_structure(self.static_site_root, site_info)
         generate.blog_structure(self.static_site_root, site_info)
         generate.blog_notes(path_to_md_dir, self.static_site_root)
+        # for every note, check the style and apply a format
         generate.index_html(self.static_site_root, self.get_root_blog_name())
         print(f'See your local site at {os.path.join(self.static_site_root,"index.html")}')
 
